@@ -109,6 +109,7 @@
       label.option.incorrect {
         border-color: var(--danger);
         background: #fef2f2;
+        color: var(--danger);
       }
       label.option .text {
         flex: 1;
@@ -476,7 +477,9 @@
 
       const renderQuiz = () => {
         quizArea.replaceChildren();
-        questions.forEach((q, index) => {
+        const randomized = [...questions].sort(() => Math.random() - 0.5);
+
+        randomized.forEach((q, index) => {
           const card = document.createElement("article");
           card.className = "quiz-card";
           card.id = q.id;
@@ -582,13 +585,7 @@
       };
 
       const resetQuiz = () => {
-        document.querySelectorAll("input[type='checkbox'], input[type='radio']").forEach((el) => {
-          el.checked = false;
-        });
-        document.querySelectorAll("label.option").forEach((label) =>
-          label.classList.remove("correct", "incorrect")
-        );
-        document.querySelectorAll(".feedback").forEach((fb) => (fb.hidden = true));
+        renderQuiz();
         scoreEl.textContent = "Noch keine Auswertung.";
         window.scrollTo({ top: 0, behavior: "smooth" });
       };
