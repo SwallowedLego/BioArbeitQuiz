@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bio Quiz – Bakterien, Viren &amp; Immunsystem</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f7fb;
+        --card: #ffffff;
+        --text: #16213e;
+        --badge-text: #0c4a6e;
+        --accent: #0f766e;
+        --accent-2: #6366f1;
+        --muted: #4b5563;
+        --border: #e5e7eb;
+        --danger: #b91c1c;
+        --success: #15803d;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: radial-gradient(circle at 20% 20%, #e0f2fe 0, transparent 25%),
+          radial-gradient(circle at 80% 0, #ede9fe 0, transparent 25%), var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+      }
+      header {
+        padding: 2.5rem 1.25rem 1rem;
+        text-align: center;
+      }
+      h1 {
+        margin: 0 0 0.5rem;
+        font-size: clamp(1.8rem, 4vw, 2.6rem);
+        letter-spacing: -0.02em;
+      }
+      p.lead {
+        margin: 0 auto;
+        max-width: 780px;
+        color: var(--muted);
+        font-size: 1rem;
+      }
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 0 1.25rem 3rem;
+      }
+      .objectives {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 0.75rem;
+        margin: 1.5rem 0 2.5rem;
+        list-style: none;
+        padding: 0;
+      }
+      .objectives li {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 0.85rem 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+        font-weight: 600;
+        color: var(--text);
+      }
+      .quiz-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 1.25rem 1.4rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.05);
+      }
+      .quiz-card h3 {
+        margin: 0 0 0.35rem;
+        font-size: 1.1rem;
+      }
+      .quiz-card p {
+        margin: 0 0 0.75rem;
+        color: var(--muted);
+      }
+      .options {
+        display: grid;
+        gap: 0.5rem;
+      }
+      label.option {
+        display: flex;
+        gap: 0.6rem;
+        align-items: flex-start;
+        padding: 0.75rem 0.85rem;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        background: #fbfcff;
+      }
+      label.option:hover {
+        border-color: var(--accent-2);
+        box-shadow: 0 4px 14px rgba(99, 102, 241, 0.1);
+      }
+      label.option.correct {
+        border-color: var(--success);
+        background: #ecfdf3;
+      }
+      label.option.incorrect {
+        border-color: var(--danger);
+        background: #fef2f2;
+      }
+      label.option .text {
+        flex: 1;
+      }
+      .controls {
+        position: sticky;
+        bottom: 0;
+        backdrop-filter: blur(8px);
+        background: rgba(245, 247, 251, 0.9);
+        padding: 1rem 0;
+        border-top: 1px solid var(--border);
+        margin-top: 1.25rem;
+      }
+      .btn-row {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      button {
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+      button.primary {
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #fff;
+        box-shadow: 0 8px 18px rgba(15, 118, 110, 0.25);
+      }
+      button.secondary {
+        background: #e2e8f0;
+        color: var(--text);
+      }
+      button:active {
+        transform: translateY(1px);
+      }
+      .score {
+        margin-top: 0.5rem;
+        text-align: center;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .feedback {
+        margin-top: 0.6rem;
+        border-left: 3px solid var(--accent-2);
+        padding-left: 0.75rem;
+        color: var(--text);
+        font-size: 0.95rem;
+      }
+      .feedback.bad {
+        border-color: var(--danger);
+      }
+      .badge {
+        display: inline-block;
+        background: #e0f2fe;
+        color: var(--badge-text);
+        border-radius: 999px;
+        padding: 0.15rem 0.6rem;
+        font-weight: 700;
+        font-size: 0.85rem;
+        margin-left: 0.35rem;
+      }
+      .sr {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      @media (max-width: 640px) {
+        label.option {
+          align-items: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header role="banner">
+      <h1>Gründliches Bio-Quiz: Bakterien, Viren &amp; Immunsystem</h1>
+      <p class="lead">
+        Beantworte die Fragen, um dein Wissen zu allen neun Themen zu prüfen: Aufbau von
+        Bakterienzellen, Virusaufbau, Antibiotika, Infektionsabläufe, Eigenschaften von Viren,
+        Hygienemaßnahmen, Immunsystem sowie angeborene/erworbene Immunantwort und Impfung.
+      </p>
+    </header>
+
+    <main>
+      <section aria-labelledby="lernziele">
+        <h2 id="lernziele">Lernziele</h2>
+        <ul class="objectives">
+          <li>Aufbau einer Bakterienzelle beschreiben und beschriften.</li>
+          <li>Bau eines Virus erklären und mit Bakterien vergleichen.</li>
+          <li>Wirkung von Antibiotika bei Bakterien &amp; fehlende Wirkung bei Viren.</li>
+          <li>Ablauf einer Virusinfektion skizzieren.</li>
+          <li>Fünf Gründe, warum Viren keine Lebewesen sind.</li>
+          <li>Wichtige Hygienemaßnahmen gegen virale &amp; bakterielle Infektionen.</li>
+          <li>Bestandteile des Immunsystems und ihre Funktionen.</li>
+          <li>Angeborene vs. erworbene Immunantwort zusammen erklären.</li>
+          <li>Vorgänge im Körper nach einer Impfung erläutern.</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="quiz">
+        <h2 id="quiz">Quiz</h2>
+        <div id="quiz-area" aria-live="polite"></div>
+      </section>
+
+      <section class="controls" aria-label="Aktionen">
+        <div class="btn-row">
+          <button class="primary" id="submit-btn">Antworten prüfen</button>
+          <button class="secondary" id="reset-btn">Zurücksetzen</button>
+        </div>
+        <p class="score" id="score" aria-live="polite">Noch keine Auswertung.</p>
+      </section>
+    </main>
+
+    <script>
+      const questions = [
+        {
+          id: "q1",
+          title: "Bakterienzelle beschriften",
+          badge: "Aufbau",
+          type: "multiple",
+          prompt: "Welche Strukturen gehören typischerweise zu einer Bakterienzelle?",
+          options: [
+            { value: "zellmembran", text: "Zellmembran und Zellwand", correct: true },
+            { value: "nucleoid", text: "DNA frei als Nukleoid im Cytoplasma", correct: true },
+            { value: "ribosomen", text: "Ribosomen zur Proteinbiosynthese", correct: true },
+            { value: "plasmide", text: "Plasmide als ringförmige DNA", correct: true },
+            { value: "flagellum", text: "Geißel (Flagellum) zur Fortbewegung", correct: true },
+            { value: "zellkern", text: "Echter Zellkern mit Kernmembran", correct: false },
+            { value: "mitochondrien", text: "Mitochondrien", correct: false },
+            { value: "chloroplasten", text: "Chloroplasten", correct: false }
+          ],
+          explanation:
+            "Bakterien besitzen eine Zellmembran, meist eine Zellwand, Ribosomen, frei liegende DNA (Nukleoid) und oft Plasmide. Bewegung erfolgt häufig über Flagellen. Ein echter, membranumhüllter Zellkern und Organellen wie Mitochondrien oder Chloroplasten fehlen."
+        },
+        {
+          id: "q2",
+          title: "Virusaufbau im Vergleich",
+          badge: "Virus vs. Bakterium",
+          type: "single",
+          prompt:
+            "Welche Aussage beschreibt den Aufbau eines Virus im Vergleich zu einer Bakterienzelle am besten?",
+          options: [
+            {
+              value: "korrekt",
+              text:
+                "Viren bestehen nur aus Erbmaterial (DNA oder RNA) und einer Proteinhülle, manchmal mit Hülle; sie besitzen keine Ribosomen, keinen Stoffwechsel und sind viel kleiner als Bakterien.",
+              correct: true
+            },
+            {
+              value: "falsch1",
+              text: "Viren haben wie Bakterien Ribosomen und können Proteine selbst herstellen.",
+              correct: false
+            },
+            {
+              value: "falsch2",
+              text: "Viren sind größer als Bakterien und verfügen über eine Zellwand.",
+              correct: false
+            },
+            {
+              value: "falsch3",
+              text: "Viren besitzen Mitochondrien zur Energiegewinnung.",
+              correct: false
+            }
+          ],
+          explanation:
+            "Viren haben einen sehr einfachen Aufbau: Genom (DNA oder RNA) + Capsid, optional eine Hülle. Ihnen fehlen Ribosomen und ein eigener Stoffwechsel, weshalb sie Wirtszellen benötigen und deutlich kleiner sind als Bakterien."
+        },
+        {
+          id: "q3",
+          title: "Antibiotika: Wirkung & Grenzen",
+          badge: "Antibiotika",
+          type: "single",
+          prompt: "Warum wirken Antibiotika gegen Bakterien, aber nicht gegen Viren?",
+          options: [
+            {
+              value: "korrekt",
+              text:
+                "Antibiotika greifen bakterielle Strukturen wie Zellwand, Ribosomen oder Stoffwechselwege an, die Viren nicht besitzen.",
+              correct: true
+            },
+            {
+              value: "falsch1",
+              text: "Viren neutralisieren Antibiotika mit ihrer Hülle.",
+              correct: false
+            },
+            {
+              value: "falsch2",
+              text: "Antibiotika wirken nur, wenn Bakterien größer als Viren sind.",
+              correct: false
+            },
+            {
+              value: "falsch3",
+              text: "Antibiotika zerstören ausschließlich Viren-DNA.",
+              correct: false
+            }
+          ],
+          explanation:
+            "Antibiotika zielen auf bakterielle Zellwände, Ribosomen oder Stoffwechselprozesse. Viren haben diese Strukturen nicht und werden deshalb von klassischen Antibiotika nicht getroffen."
+        },
+        {
+          id: "q4",
+          title: "Ablauf einer Virusinfektion",
+          badge: "Infektionszyklus",
+          type: "single",
+          prompt: "Welche Reihenfolge beschreibt den typischen Ablauf einer Virusinfektion?",
+          options: [
+            {
+              value: "korrekt",
+              text:
+                "Anheften an Wirtszelle → Eindringen/Freisetzung des Genoms → Nutzung der Wirtsmaschinerie zur Vermehrung → Zusammenbau neuer Viren → Freisetzung (z. B. Zelllyse).",
+              correct: true
+            },
+            {
+              value: "falsch1",
+              text: "Anheften → Bildung eigener Ribosomen → Teilung wie Bakterien → Freisetzung.",
+              correct: false
+            },
+            {
+              value: "falsch2",
+              text: "Eindringen → Photosynthese → Knospung → Zellteilung.",
+              correct: false
+            },
+            {
+              value: "falsch3",
+              text: "Freisetzung → Anheften → Zusammenbau → Eindringen.",
+              correct: false
+            }
+          ],
+          explanation:
+            "Viren adsorbieren an Rezeptoren, schleusen ihr Genom ein, kapern Ribosomen/Enzyme der Wirtszelle, replizieren und verlassen die Zelle meist per Lyse oder Knospung."
+        },
+        {
+          id: "q5",
+          title: "Warum Viren keine Lebewesen sind",
+          badge: "5 Kennzeichen",
+          type: "multiple",
+          prompt: "Welche Gründe sprechen dafür, dass Viren nicht als Lebewesen gelten? (Mehrfachauswahl)",
+          options: [
+            { value: "stoffwechsel", text: "Kein eigener Stoffwechsel/Energiegewinnung", correct: true },
+            { value: "zellaufbau", text: "Kein eigener Zellaufbau", correct: true },
+            { value: "fortpflanzung", text: "Keine eigenständige Fortpflanzung ohne Wirt", correct: true },
+            { value: "wachstum", text: "Kein eigenes Wachstum/Entwicklung aus sich heraus", correct: true },
+            { value: "reiz", text: "Keine selbstständige Reizbarkeit/Regulation", correct: true },
+            { value: "bewegung", text: "Aktive Eigenbewegung mit Muskeln", correct: false }
+          ],
+          explanation:
+            "Lebewesen zeichnen sich u. a. durch Stoffwechsel, Zellaufbau, eigenes Wachstum, Reizbarkeit/Regulation und Fortpflanzung aus. Viren besitzen diese Merkmale nicht ohne Wirt und benötigen daher zwingend einen Wirt."
+        },
+        {
+          id: "q6",
+          title: "Hygienemaßnahmen",
+          badge: "Prävention",
+          type: "multiple",
+          prompt: "Welche Hygienemaßnahmen helfen, virale und bakterielle Infektionen zu verhindern?",
+          options: [
+            { value: "haende", text: "Regelmäßiges Händewaschen mit Seife", correct: true },
+            { value: "hustenetikette", text: "Husten- und Niesetikette (in Armbeuge/Taschentuch)", correct: true },
+            { value: "desinfektion", text: "Flächen- und Handdesinfektion bei Bedarf", correct: true },
+            { value: "impfung", text: "Empfohlene Schutzimpfungen wahrnehmen", correct: true },
+            { value: "lueften", text: "Räume lüften und Abstand bei Erkrankten halten", correct: true },
+            { value: "antibiotika", text: "Vorbeugend Antibiotika bei Erkältung einnehmen", correct: false }
+          ],
+          explanation:
+            "Zentrale Maßnahmen sind Händehygiene, Hustenetikette, Desinfektion bei Bedarf, Lüften/Abstand sowie Impfungen. Prophylaktische Antibiotika bei Erkältungen sind nutzlos und fördern Resistenzen."
+        },
+        {
+          id: "q7",
+          title: "Bestandteile des Immunsystems",
+          badge: "Immunsystem",
+          type: "multiple",
+          prompt: "Welche Aussagen zu Bestandteilen und Funktionen des Immunsystems stimmen?",
+          options: [
+            { value: "fresszellen", text: "Makrophagen/Granulozyten phagozytieren Erreger (angeboren).", correct: true },
+            { value: "b-zellen", text: "B-Zellen bilden Antikörper und Gedächtniszellen (erworben).", correct: true },
+            { value: "t-hilf", text: "T-Helferzellen steuern und aktivieren andere Immunzellen.", correct: true },
+            { value: "t-killer", text: "Zytotoxische T-Zellen zerstören infizierte Körperzellen.", correct: true },
+            { value: "lymphorgane", text: "Knochenmark, Lymphknoten und Milz sind zentrale Immunorgane.", correct: true },
+            { value: "leber", text: "Leber ist das einzige Organ, das Antikörper herstellt.", correct: false }
+          ],
+          explanation:
+            "Angeborenes System: Fresszellen, Granulozyten, Komplementsystem. Erworbenes System: B-Zellen/Antikörper, T-Helferzellen, zytotoxische T-Zellen. Knochenmark, Lymphknoten und Milz dienen als Bildungs- und Filterorte."
+        },
+        {
+          id: "q8",
+          title: "Angeboren & erworben zusammen",
+          badge: "Immunantwort",
+          type: "single",
+          prompt:
+            "Wie arbeiten angeborene und erworbene Immunantwort bei einer Infektion zusammen?",
+          options: [
+            {
+              value: "korrekt",
+              text:
+                "Angeborene Abwehr reagiert schnell (z. B. Phagozytose, Entzündung) und präsentiert Antigene; darauf aufbauend aktivieren B- und T-Zellen spezifische Antikörper und zelluläre Antworten. Gedächtniszellen sichern Langzeitschutz.",
+              correct: true
+            },
+            {
+              value: "falsch1",
+              text: "Nur die angeborene Abwehr reagiert, die erworbene spielt keine Rolle.",
+              correct: false
+            },
+            {
+              value: "falsch2",
+              text: "Die erworbene Immunantwort startet immer vor der angeborenen.",
+              correct: false
+            },
+            {
+              value: "falsch3",
+              text: "Angeborene Abwehr zerstört Antigene, ohne sie zu präsentieren.",
+              correct: false
+            }
+          ],
+          explanation:
+            "Die angeborene Abwehr ist die schnelle erste Barriere und liefert Antigen-Präsentation. Darauf folgen spezifische B- und T-Zell-Reaktionen und die Bildung von Gedächtniszellen, die beide Systeme verbinden."
+        },
+        {
+          id: "q9",
+          title: "Was passiert bei einer Impfung?",
+          badge: "Impfung",
+          type: "single",
+          prompt: "Welche Vorgänge laufen im Körper nach einer Impfung ab?",
+          options: [
+            {
+              value: "korrekt",
+              text:
+                "Abgeschwächte/abgetötete Erreger oder Antigenbestandteile werden präsentiert, B-Zellen bilden Antikörper und Gedächtniszellen, T-Zellen werden spezifisch aktiviert – ohne eine echte Erkrankung zu verursachen.",
+              correct: true
+            },
+            {
+              value: "falsch1",
+              text: "Antibiotika im Impfstoff töten alle Viren im Blut ab.",
+              correct: false
+            },
+            {
+              value: "falsch2",
+              text: "Impfungen bewirken nur eine starke Entzündung ohne Antikörperbildung.",
+              correct: false
+            },
+            {
+              value: "falsch3",
+              text: "Impfungen ersetzen die angeborene Immunantwort vollständig.",
+              correct: false
+            }
+          ],
+          explanation:
+            "Impfstoffe präsentieren Antigene kontrolliert. Dadurch werden B- und T-Zellen spezifisch aktiviert, Antikörper und Gedächtniszellen entstehen und schützen bei späterem Kontakt, ohne dass die Krankheit voll ausbricht."
+        }
+      ];
+
+      const quizArea = document.getElementById("quiz-area");
+      const scoreEl = document.getElementById("score");
+      const submitBtn = document.getElementById("submit-btn");
+      const resetBtn = document.getElementById("reset-btn");
+
+      const renderQuiz = () => {
+        quizArea.replaceChildren();
+        questions.forEach((q, index) => {
+          const card = document.createElement("article");
+          card.className = "quiz-card";
+          card.id = q.id;
+
+          const title = document.createElement("h3");
+          title.textContent = `${index + 1}. ${q.title}`;
+          const badge = document.createElement("span");
+          badge.className = "badge";
+          badge.textContent = q.badge;
+          title.appendChild(badge);
+
+          const prompt = document.createElement("p");
+          prompt.textContent = q.prompt;
+
+          const optionsWrapper = document.createElement("div");
+          optionsWrapper.className = "options";
+
+          q.options.forEach((opt, optIndex) => {
+            const label = document.createElement("label");
+            label.className = "option";
+            label.setAttribute("data-correct", opt.correct);
+
+            const input = document.createElement("input");
+            input.type = q.type === "multiple" ? "checkbox" : "radio";
+            input.name = q.id;
+            input.value = opt.value;
+            input.id = `${q.id}-${optIndex}`;
+            input.setAttribute("aria-label", opt.text);
+
+            const text = document.createElement("span");
+            text.className = "text";
+            text.textContent = opt.text;
+
+            label.appendChild(input);
+            label.appendChild(text);
+            optionsWrapper.appendChild(label);
+          });
+
+          const feedback = document.createElement("div");
+          feedback.className = "feedback";
+          feedback.id = `${q.id}-feedback`;
+          feedback.hidden = true;
+          feedback.textContent = q.explanation;
+
+          card.appendChild(title);
+          card.appendChild(prompt);
+          card.appendChild(optionsWrapper);
+          card.appendChild(feedback);
+          quizArea.appendChild(card);
+        });
+      };
+
+      const evaluate = () => {
+        let correctCount = 0;
+
+        questions.forEach((q) => {
+          const selectedInputs = Array.from(document.querySelectorAll(`input[name="${q.id}"]`)).filter(
+            (input) => input.checked
+          );
+          const labels = Array.from(document.querySelectorAll(`#${q.id} label.option`));
+
+          // reset styles
+          labels.forEach((label) => label.classList.remove("correct", "incorrect"));
+
+          const selectedValues = new Set(selectedInputs.map((el) => el.value));
+          const correctValues = new Set(q.options.filter((o) => o.correct).map((o) => o.value));
+
+          let isQuestionCorrect;
+          if (q.type === "multiple") {
+            isQuestionCorrect =
+              selectedValues.size === correctValues.size &&
+              [...selectedValues].every((val) => correctValues.has(val));
+          } else {
+            const chosen = selectedInputs[0]?.value;
+            isQuestionCorrect = chosen ? correctValues.has(chosen) : false;
+          }
+
+          labels.forEach((label) => {
+            const input = label.querySelector("input");
+            const isSelected = selectedValues.has(input.value);
+            const isCorrectOption = label.dataset.correct === "true";
+
+            if (isSelected && isCorrectOption) {
+              label.classList.add("correct");
+            } else if (isSelected && !isCorrectOption) {
+              label.classList.add("incorrect");
+            } else if (!isSelected && isCorrectOption && q.type === "single") {
+              // mark missed correct option for single choice
+              label.classList.add("correct");
+            }
+          });
+
+          const feedback = document.getElementById(`${q.id}-feedback`);
+          feedback.hidden = false;
+          feedback.classList.toggle("bad", !isQuestionCorrect);
+
+          if (isQuestionCorrect) {
+            correctCount += 1;
+          }
+        });
+
+        scoreEl.textContent = `Ergebnis: ${correctCount} von ${questions.length} Fragen korrekt.`;
+      };
+
+      const resetQuiz = () => {
+        document.querySelectorAll("input[type='checkbox'], input[type='radio']").forEach((el) => {
+          el.checked = false;
+        });
+        document.querySelectorAll("label.option").forEach((label) =>
+          label.classList.remove("correct", "incorrect")
+        );
+        document.querySelectorAll(".feedback").forEach((fb) => (fb.hidden = true));
+        scoreEl.textContent = "Noch keine Auswertung.";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+
+      renderQuiz();
+      submitBtn.addEventListener("click", evaluate);
+      resetBtn.addEventListener("click", resetQuiz);
+    </script>
+  </body>
+</html>
